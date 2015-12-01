@@ -1,5 +1,11 @@
 #include <Wire.h>
 #include <ZX_Sensor.h>
+#include <DigitalPin.h>
+
+DigitalPin pin13(13);
+DigitalPin pin12(12);
+DigitalPin pin9(9);
+DigitalPin pin8(8);
 
 // Constants
 const int ZX_ADDR = 0x10;  // ZX Sensor I2C address
@@ -70,21 +76,28 @@ void loop() {
     z_pos = zx_sensor.readZ();
     // do some quick error checking:
     if ( z_pos != ZX_ERROR && x_pos != ZX_ERROR ) {
-        //  left direction
-        if (x_pos < 80) {
+        
+        // for stopping interference
+        if (z_pos >2000) {
+          stop_stop();
+          Serial.println("NO DATA STOPPED");
+        }
+
+        // left direction
+        else if (x_pos < 80) {
             // go forward left
             if (z_pos < 60) {
-              //go_forward_left();
+              go_forward_left();
               Serial.println("Forward left!");
             }
             // stop left
             else if (z_pos >= 60 && z_pos < 120) {
-              //stop_left();
+              stop_left();
               Serial.println("Stop left!");
             }
             // go backward left
             else if (z_pos >= 120) {
-              // go_backward_left();
+              go_backward_left();
               Serial.println("Backward left!");
             }
         } // end of left 
@@ -92,17 +105,17 @@ void loop() {
         else if (x_pos >= 80 && x_pos < 160) {
             // go forward 
             if (z_pos < 60) {
-              //go_forward_left();
+              go_forward();
               Serial.println("Forward!");
             }
             // stop
             else if (z_pos >= 60 && z_pos < 120) {
-              //stop_left();
+              stop_stop();
               Serial.println("Stop!");
             }
             // go backward
             else if (z_pos >= 120) {
-              // go_backward_left();
+              go_backward();
               Serial.println("Backward!");
             }
         } // end of straight
@@ -110,24 +123,93 @@ void loop() {
         else if (x_pos >= 160) {
             // go forward right
             if (z_pos < 60) {
-              //go_forward_left();
+              go_forward_right();
               Serial.println("Forward Right!");
             }
             // stop right
             else if (z_pos >= 60 && z_pos < 120) {
-              //stop_left();
+              stop_right();
               Serial.println("Stop Right!");
             }
             // go backward right
             else if (z_pos >= 120) {
-              // go_backward_left();
+              go_backward_right();
               Serial.println("Backward Right!");
             }
         } // end of right 
-    }
-     
+    } 
 
+  
   delay(1000);
   } // end of if sensor data loop
+  //otherwise stop
+  else {
+    stop_stop();
+    Serial.println("NO DATA");
+    delay(1000);
+  }
+}
 
+// function defs
+int go_forward() {
+  pin13.off();
+  pin12.on();
+  pin9.on();
+  pin8.on();
+}
+
+int go_backward() {
+  pin13.off();
+  pin12.off();
+  pin9.on();
+  pin8.on();
+}
+
+int go_forward_right() {
+  pin13.off();
+  pin12.on();
+  pin9.off();
+  pin8.on();
+}
+
+int go_backward_right() {
+  pin13.off();
+  pin12.off();
+  pin9.off();
+  pin8.on();
+}
+
+int go_forward_left() {
+  pin13.off();
+  pin12.on();
+  pin9.off();
+  pin8.off();
+}
+
+int go_backward_left() {
+  pin13.off();
+  pin12.off();
+  pin9.on();
+  pin8.off();
+}
+
+int stop_stop() {
+  pin13.off();
+  pin12.off();
+  pin9.off();
+  pin8.off();
+}
+
+int stop_right() {
+  pin13.on();
+  pin12.on();
+  pin9.off();
+  pin8.on();
+}
+
+int stop_left() {
+  pin13.on();
+  pin12.on();
+  pin9.on();
+  pin8.off();
 }
