@@ -2,10 +2,10 @@
 #include <ZX_Sensor.h>
 #include <DigitalPin.h>
 
-const x_int1 = 80;
-const x_int2 = 160;
-const z_int1 = 60;
-const z_int2 = 120;
+const int  x_int1 = 80;
+const int x_int2 = 160;
+const int z_int1 = 60;
+const int z_int2 = 120;
 
 DigitalPin pin13(13);
 DigitalPin pin12(12);
@@ -69,34 +69,94 @@ void setup() {
   }
 }
 
+  // setup sensitivity function
+  int prev_x = 0;
+  int prev2_x = 0;
+  int prev3_x = 0;
+  int temp_val = 0;
+  
 void loop() {
   // put your main code here, to run repeatedly:
-  // if x < 80 go left, if 80 < x < 120 go straight, 
-  // if x > 120 go right
 
-  // if z < 60, 
   // If there is position data available
   if ( zx_sensor.positionAvailable() ) {
     x_pos = zx_sensor.readX();
     z_pos = zx_sensor.readZ();
-
-    // Sensitivity Function
-    if (x_po
-
-
-    // end sensitivity function
     
     // do some quick error checking:
     if ( z_pos != ZX_ERROR && x_pos != ZX_ERROR ) {
-        
-        // for stopping interference
-        if (z_pos > 200) {
-          stop_stop();
-          Serial.println("NO DATA STOPPED");
-        }
 
+        // ---------- Sensitivity Function --------------
+    
+        // convert x value:
+        if (x_pos <= x_int1) {
+          x_pos = 1;
+        }
+        else if (x_pos <= x_int2) {
+          x_pos = 2;
+        }
+        else {
+          x_pos = 3;
+        }
+        Serial.print("X val converted was: ");
+        Serial.print(x_pos);
+        Serial.print("\n");
+        /* String string_out = "Pos: " + x_pos;
+          string_out = string_out + " " + prev_x;
+          string_out = string_out + " " + prev2_x;
+          string_out = string_out + " " + prev3_x;
+          Serial.println(string_out); */
+        Serial.print ("X,1,2,3 was: ");
+        Serial.print(x_pos);
+        Serial.print(prev_x);
+        Serial.print(prev2_x);
+        Serial.print(prev3_x);
+        Serial.print("\n");
+        
+        if (x_pos != prev_x && x_pos != prev2_x && x_pos != prev3_x) {
+          // to save when we change
+          temp_val = (prev_x + prev2_x + prev3_x) / 3;
+          prev3_x = prev2_x;
+          prev2_x = prev_x;
+          prev_x = x_pos;
+          // (the old value)
+          x_pos = temp_val;
+
+               Serial.print ("X,1,2,3 was: ");
+        Serial.print(x_pos);
+        Serial.print(prev_x);
+        Serial.print(prev2_x);
+        Serial.print(prev3_x);
+        Serial.print("\n");
+    
+          // we need to convert back 
+          switch (x_pos) {
+            case 1:
+              x_pos = (x_int1 - 2);
+              break;
+            case 2: 
+              x_pos = (x_int2 - 2);
+              break;
+            case 3:
+              x_pos = (x_int2 + 1);
+              break;
+          }
+        }
+        else {
+          temp_val = prev_x;
+          prev3_x = prev2_x;
+          prev2_x = prev_x;
+          prev_x = x_pos;
+          // (the old value)
+          x_pos = temp_val;
+        }
+        
+    
+        // ----------- end sensitivity function ----------
+ 
         // left direction
-        else if (x_pos < x_int1) {
+        // could be else if? 
+        if (x_pos < x_int1) {
             // go forward left
             if (z_pos < z_int1) {
               go_forward_left();
@@ -152,13 +212,13 @@ void loop() {
     } 
 
   
-  delay(100);
+  delay(1000);
   } // end of if sensor data loop
   //otherwise stop
   else {
     stop_stop();
     Serial.println("NO DATA");
-    delay(100);
+    delay(1000);
   }
 }
 
