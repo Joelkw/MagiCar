@@ -78,6 +78,9 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
+  go_forward_right();
+ /// go_backward_left();
+  delay(5000);
   // If there is position data available
   if ( zx_sensor.positionAvailable() ) {
     x_pos = zx_sensor.readX();
@@ -106,30 +109,34 @@ void loop() {
           string_out = string_out + " " + prev2_x;
           string_out = string_out + " " + prev3_x;
           Serial.println(string_out); */
-        Serial.print ("X,1,2,3 was: ");
+        /*Serial.print ("X,1,2,3 was: ");
         Serial.print(x_pos);
         Serial.print(prev_x);
         Serial.print(prev2_x);
         Serial.print(prev3_x);
+        Serial.print("\n");*/
+
+        int maj = (prev_x+prev2_x+prev3_x)/3;
+        Serial.print("Maj was:");
+        Serial.print(maj);
         Serial.print("\n");
+        if (x_pos != maj) {
+            // to save when we change
+            temp_val = x_pos;
+            x_pos = maj;
+            /*Serial.print ("X,1,2,3 was: ");
+            Serial.print(x_pos);
+            Serial.print(prev_x);
+            Serial.print(prev2_x);
+            Serial.print(prev3_x);
+            Serial.print("\n");*/
+        }
         
-        if (x_pos != prev_x && x_pos != prev2_x && x_pos != prev3_x) {
-          // to save when we change
-          temp_val = (prev_x + prev2_x + prev3_x) / 3;
           prev3_x = prev2_x;
           prev2_x = prev_x;
-          prev_x = x_pos;
-          // (the old value)
-          x_pos = temp_val;
+          prev_x = temp_val;
 
-               Serial.print ("X,1,2,3 was: ");
-        Serial.print(x_pos);
-        Serial.print(prev_x);
-        Serial.print(prev2_x);
-        Serial.print(prev3_x);
-        Serial.print("\n");
-    
-          // we need to convert back 
+          // switch back
           switch (x_pos) {
             case 1:
               x_pos = (x_int1 - 2);
@@ -141,15 +148,10 @@ void loop() {
               x_pos = (x_int2 + 1);
               break;
           }
-        }
-        else {
-          temp_val = prev_x;
-          prev3_x = prev2_x;
-          prev2_x = prev_x;
-          prev_x = x_pos;
-          // (the old value)
-          x_pos = temp_val;
-        }
+            /*Serial.print("x_pos converted back was");
+        Serial.print(x_pos);
+        Serial.print("/n");*/
+       
         
     
         // ----------- end sensitivity function ----------

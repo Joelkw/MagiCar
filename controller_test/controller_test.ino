@@ -22,12 +22,17 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  pin13.on();
-  pin12.on();
-  pin9.on();
-  pin8.off();
+  go_forward_right();
 
 }
+
+int go_forward_right() {
+  pin13.off();
+  pin12.on();
+  pin9.off();
+  pin8.on();
+}
+
 
 /*
 // function defs
